@@ -87,9 +87,9 @@ async function deleteStatus(req, res){
         const status = await Status.findByIdAndDelete(statusId);
 
         if(!status){
-            res.status(400).send({msg: "the role does not exist"});
+            res.status(400).send({msg: "the status does not exist"});
         }else{
-            res.status(200).send({msg: "the role has been delete"});
+            res.status(200).send({msg: "the status has been delete"});
         }
     }catch(error){
         res.status(500).send(error);

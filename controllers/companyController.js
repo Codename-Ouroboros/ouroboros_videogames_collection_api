@@ -1,5 +1,5 @@
 
-const Company = require('../models/companiesModel');
+const Company = require('../models/companyModel');
 
 async function getCompanies(req, res){
     // returns a list of companies that distribute, manufacture and develop video games
@@ -7,7 +7,7 @@ async function getCompanies(req, res){
     try{
         const companies = await Company.find().sort({name: 1});
 
-        if(!companies){
+        if(genres.length === 0){
             res.status(400).send({msg: "there are no companies"});
         }else{
             res.status(200).send(companies);

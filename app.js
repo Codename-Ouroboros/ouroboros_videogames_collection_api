@@ -6,6 +6,7 @@ const genreRoutes = require('./routes/genreRoutes');
 const roleRoutes = require('./routes/roleRoutes');
 const statusRoutes = require('./routes/statusRoutes');
 const systemTypeRoutes = require('./routes/systemTypeRoutes');
+const regionRoutes = require('./routes/regionRoutes');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -16,5 +17,6 @@ app.use('/api', genreRoutes);
 app.use('/api', roleRoutes);
 app.use('/api', statusRoutes);
 app.use('/api', systemTypeRoutes);
+app.use('/api', regionRoutes);
 
 module.exports = app;

@@ -9,6 +9,7 @@ const systemTypeRoutes = require('./routes/systemTypeRoutes');
 const regionRoutes = require('./routes/regionRoutes');
 const systemRoutes = require('./routes/systemRoutes');
 const gameRoutes = require('./routes/gameRoutes');
+const peripheralRoutes = require('./routes/peripheralRoutes');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -22,5 +23,6 @@ app.use('/api', systemTypeRoutes);
 app.use('/api', regionRoutes);
 app.use('/api', systemRoutes);
 app.use('/api', gameRoutes);
+app.use('/api', peripheralRoutes);
 
 module.exports = app;

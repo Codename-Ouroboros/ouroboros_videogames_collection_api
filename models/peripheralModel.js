@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
-const systemSchema = Schema({
-    model: {
+const peripheralSchema = Schema({
+    name: {
         type: String,
         require: true
     },
@@ -11,21 +11,17 @@ const systemSchema = Schema({
         type: ObjectId,
         require: true
     },
-    logo: {
-        type: String,
+    system: {
+        type: ObjectId,
         require: false
     },
     images: {
         type: Array,
         require: false
     }, 
-    text_logo: {
-        type: String,
-        require: false
-    },
-    type_system: {
+    status: {
         type: ObjectId,
-        require: true
+        require: false
     },
     ean: {
         type: String,
@@ -37,4 +33,4 @@ const systemSchema = Schema({
     },
 });
 
-module.exports = mongoose.model('systems', systemSchema);
+module.exports = mongoose.model('peripherals', peripheralSchema);

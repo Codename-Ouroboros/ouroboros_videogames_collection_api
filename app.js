@@ -8,6 +8,7 @@ const statusRoutes = require('./routes/statusRoutes');
 const systemTypeRoutes = require('./routes/systemTypeRoutes');
 const regionRoutes = require('./routes/regionRoutes');
 const systemRoutes = require('./routes/systemRoutes');
+const gameRoutes = require('./routes/gameRoutes');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -20,5 +21,6 @@ app.use('/api', statusRoutes);
 app.use('/api', systemTypeRoutes);
 app.use('/api', regionRoutes);
 app.use('/api', systemRoutes);
+app.use('/api', gameRoutes);
 
 module.exports = app;

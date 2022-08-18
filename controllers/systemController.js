@@ -46,7 +46,8 @@ async function postSystem(req, res){
     system.model = params.model;
     system.brand = params.brand;
     system.logo = params.logo;
-    system.image = params.image;
+    system.images = params.images;
+    system.status = params.status;
     system.text_logo = params.text_logo;
     system.type_system = params.type_system;
     system.ean = params.ean;

@@ -1,11 +1,14 @@
 
 const Game = require('../models/gameModel');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 async function getGames(req, res){
     // returns a list of games
+
+    const user = await authMiddleware.getUser(req, res);
     
     try{
-        const games = await Game.find().sort({title: 1});
+        const games = await Game.find({user_id: user.id}).sort({title: 1});
 
         if(games.length === 0){
             res.status(400).send({msg: "there are no games"});
@@ -21,12 +24,15 @@ async function getGame(req, res){
     // returns a game
 
     const gameId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
         const game = await Game.findById(gameId);
 
         if(!game){
             res.status(400).send({msg: "the game does not exist"});
+        }else if(game.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
             res.status(200).send(game);
         }
@@ -38,6 +44,8 @@ async function getGame(req, res){
 
 async function postGame(req, res){
     // create a new game
+
+    const user = await authMiddleware.getUser(req, res);
 
     const game = new Game();
     const params = req.body;
@@ -59,6 +67,7 @@ async function postGame(req, res){
     game.release_date = params.release_date;
     game.ean = params.ean;
     game.serial = params.serial;
+    game.user_id = user.id;
 
     try{
         const gameStore = await game.save();
@@ -78,9 +87,16 @@ async function putGame(req, res){
 
     const gameId = req.params.id;
     const params = req.body;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const game = await Game.findByIdAndUpdate(gameId, params);
+        let game = await Game.findById(gameId);
+
+        if(game.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+        }
+        
+        game = await Game.findByIdAndUpdate(gameId, params);
 
         if(!game){
             res.status(400).send({msg: "the game does not exist"});

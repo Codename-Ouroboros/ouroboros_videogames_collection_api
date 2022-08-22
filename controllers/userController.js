@@ -20,7 +20,13 @@ async function register(req, res){
         if(nicknameExists) throw {msg: "Nickname already exists"};
 
         const salt = bcryptjs.genSaltSync(10);
+
+        user.nickname = params.nickname;
+        user.name = params.name;
+        user.lastname = params.lastname;
+        user.email = params.email;
         user.password = await bcryptjs.hash(password, salt);
+        user.birthdate = params.birthdate;
 
         user.save();
         res.status(200).send(user);

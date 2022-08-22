@@ -31,6 +31,10 @@ const peripheralSchema = Schema({
         type: String,
         require: false
     },
+    user_id: {
+        type: ObjectId,
+        require: true
+    }
 });
 
 module.exports = mongoose.model('peripherals', peripheralSchema);

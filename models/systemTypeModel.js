@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const ObjectId = Schema.ObjectId;
 
 const systemTypeSchema = Schema({
     type: {
@@ -13,6 +14,10 @@ const systemTypeSchema = Schema({
     logo: {
         type: String,
         require: false
+    },
+    user_id: {
+        type: ObjectId,
+        require: true
     }
 });
 

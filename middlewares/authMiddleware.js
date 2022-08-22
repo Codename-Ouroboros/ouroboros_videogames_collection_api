@@ -24,6 +24,14 @@ function ensureAuth(req, res, next){
     }
 }
 
+function getUser(req, res){
+    const token = req.headers.authorization.replace(/['"]+/g, "");
+    const payload = jwt.decodeToken(token, SECRET_KEY);
+
+    return payload;
+}
+
 module.exports = {
-    ensureAuth
+    ensureAuth,
+    getUser
 }

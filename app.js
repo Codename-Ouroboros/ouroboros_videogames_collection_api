@@ -10,6 +10,7 @@ const regionRoutes = require('./routes/regionRoutes');
 const systemRoutes = require('./routes/systemRoutes');
 const gameRoutes = require('./routes/gameRoutes');
 const peripheralRoutes = require('./routes/peripheralRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -24,5 +25,7 @@ app.use('/api', regionRoutes);
 app.use('/api', systemRoutes);
 app.use('/api', gameRoutes);
 app.use('/api', peripheralRoutes);
+app.use('/api', userRoutes);
+app.use('*', (req, res) => {res.status(404).send({msg: "The requested route does not exist"})});
 
 module.exports = app;

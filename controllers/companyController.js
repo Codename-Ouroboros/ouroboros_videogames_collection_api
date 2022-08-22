@@ -7,7 +7,7 @@ async function getCompanies(req, res){
     try{
         const companies = await Company.find().sort({name: 1});
 
-        if(genres.length === 0){
+        if(companies.length === 0){
             res.status(400).send({msg: "there are no companies"});
         }else{
             res.status(200).send(companies);

@@ -15,6 +15,10 @@ const systemSchema = Schema({
         type: String,
         require: false
     },
+    photo: {
+        type: String,
+        require: false
+    },
     images: {
         type: Array,
         require: false

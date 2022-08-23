@@ -52,8 +52,6 @@ async function postSystemType(req, res){
 
     // body data:
     systemType.type = params.type;
-    systemType.key = params.key;
-    systemType.logo = params.logo;
     systemType.user_id = user.id;
 
     try{

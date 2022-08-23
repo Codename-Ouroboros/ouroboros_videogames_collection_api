@@ -7,14 +7,6 @@ const systemTypeSchema = Schema({
         type: String,
         require: true
     },
-    key: {
-        type: String,
-        require: true
-    },
-    logo: {
-        type: String,
-        require: false
-    },
     user_id: {
         type: ObjectId,
         require: true

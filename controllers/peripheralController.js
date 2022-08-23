@@ -54,6 +54,7 @@ async function postPeripheral(req, res){
     peripheral.name = params.name;
     peripheral.brand = params.brand;
     peripheral.system = params.system;
+    peripheral.photo = params.photo;
     peripheral.images = params.images;
     peripheral.status = params.status;
     peripheral.ean = params.ean;

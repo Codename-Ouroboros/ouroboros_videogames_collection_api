@@ -52,7 +52,6 @@ async function postRegion(req, res){
 
     // body data:
     region.region = params.region;
-    region.logo = params.logo;
     region.user_id = user.id;
 
     try{

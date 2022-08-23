@@ -28,6 +28,10 @@ const userSchema = Schema({
     password: {
         type: String,
         require: true
+    },
+    avatar: {
+        type: String,
+        require: false
     }
 });
 

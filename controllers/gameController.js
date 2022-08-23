@@ -92,15 +92,12 @@ async function putGame(req, res){
     try{
         let game = await Game.findById(gameId);
 
-        if(game.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }
-        
-        game = await Game.findByIdAndUpdate(gameId, params);
-
         if(!game){
             res.status(400).send({msg: "the game does not exist"});
+        }else if(game.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            game = await Game.findByIdAndUpdate(gameId, params);
             res.status(201).send({msg: "the game has been update"});
         }
     }catch(error){
@@ -112,13 +109,19 @@ async function deleteGame(req, res){
     // delete a game
 
     const gameId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const game = await Game.findByIdAndDelete(gameId);
 
+        
+        let game = await Game.findById(gameId);
+        
         if(!game){
             res.status(400).send({msg: "the game does not exist"});
+        }else if(game.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            game = await Game.findByIdAndDelete(gameId);
             res.status(200).send({msg: "the game has been delete"});
         }
     }catch(error){

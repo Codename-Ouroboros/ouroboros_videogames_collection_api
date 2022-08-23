@@ -78,16 +78,12 @@ async function putRegion(req, res){
     try{
         let region = await Region.findById(regionId);
 
-        if(region.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }
-
-        region = await Region.findByIdAndUpdate(regionId, params);
-
-
         if(!region){
             res.status(400).send({msg: "the region does not exist"});
+        }else if(region.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            region = await Region.findByIdAndUpdate(regionId, params);
             res.status(201).send({msg: "the region has been update"});
         }
     }catch(error){
@@ -99,13 +95,17 @@ async function deleteRegion(req, res){
     // delete a region
 
     const regionId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const region = await Region.findByIdAndDelete(regionId);
+        let region = await Region.findById(regionId);
 
         if(!region){
             res.status(400).send({msg: "the region does not exist"});
+        }else if(region.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            region = await Region.findByIdAndDelete(regionId);
             res.status(200).send({msg: "the region has been delete"});
         }
     }catch(error){

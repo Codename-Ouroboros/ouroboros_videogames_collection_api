@@ -85,16 +85,13 @@ async function putSystem(req, res){
     try{
         let system = await System.findById(systemId);
 
-        if(system.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }
-
-        system = await System.findByIdAndUpdate(systemId, params);
-
 
         if(!system){
             res.status(400).send({msg: "the system does not exist"});
+        }else if(system.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            system = await System.findByIdAndUpdate(systemId, params);
             res.status(201).send({msg: "the system has been update"});
         }
     }catch(error){
@@ -106,13 +103,17 @@ async function deleteSystem(req, res){
     // delete a system
 
     const systemId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const system = await System.findByIdAndDelete(systemId);
+        let system = await System.findById(systemId);
 
         if(!system){
             res.status(400).send({msg: "the system does not exist"});
+        }else if(system.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            system = await System.findByIdAndDelete(systemId);
             res.status(200).send({msg: "the system has been delete"});
         }
     }catch(error){

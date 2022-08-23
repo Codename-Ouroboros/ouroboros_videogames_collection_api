@@ -76,13 +76,14 @@ async function putGenre(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        const genre = await Genre.findByIdAndUpdate(genreId, params);
+        let genre = await Genre.findById(genreId);
 
         if(!genre){
             res.status(400).send({msg: "the genre does not exist"});
         }else if(genre.user_id != user.id){
             res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            genre = await Genre.findByIdAndUpdate(genreId, params);
             res.status(201).send({msg: "the genre has been update"});
         }
     }catch(error){
@@ -94,19 +95,17 @@ async function deleteGenre(req, res){
     // delete a genre
 
     const genreId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
         let genre = await Genre.findById(genreId);
 
-        if(genre.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }
-
-        genre = await Genre.findByIdAndUpdate(genreId, params);
-
         if(!genre){
             res.status(400).send({msg: "the genre does not exist"});
+        }else if(genre.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            genre = await Genre.findByIdAndDelete(genreId);
             res.status(200).send({msg: "the genre has been delete"});
         }
     }catch(error){

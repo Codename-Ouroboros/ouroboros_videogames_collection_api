@@ -28,10 +28,6 @@ const userSchema = Schema({
     password: {
         type: String,
         require: true
-    },
-    role: {
-        type: ObjectId,
-        require: false
     }
 });
 

@@ -1,11 +1,14 @@
 
 const System = require('../models/systemModel');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 async function getSystems(req, res){
     // returns a list of Systems
+
+    const user = await authMiddleware.getUser(req, res);
     
     try{
-        const systems = await System.find().sort({model: 1});
+        const systems = await System.find({user_id: user.id}).sort({model: 1});
 
         if(systems.length === 0){
             res.status(400).send({msg: "there are no systems"});
@@ -21,12 +24,15 @@ async function getSystem(req, res){
     // returns a system
 
     const systemId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
         const system = await System.findById(systemId);
 
         if(!system){
             res.status(400).send({msg: "the system does not exist"});
+        }else if(system.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
             res.status(200).send(system);
         }
@@ -38,6 +44,8 @@ async function getSystem(req, res){
 
 async function postSystem(req, res){
     // create a new system
+
+    const user = await authMiddleware.getUser(req, res);
 
     const system = new System();
     const params = req.body;
@@ -52,6 +60,7 @@ async function postSystem(req, res){
     system.type_system = params.type_system;
     system.ean = params.ean;
     system.serial = params.serial;
+    system.user_id = user.id; 
 
     try{
         const systemStore = await system.save();
@@ -71,13 +80,18 @@ async function putSystem(req, res){
 
     const systemId = req.params.id;
     const params = req.body;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const system = await System.findByIdAndUpdate(systemId, params);
+        let system = await System.findById(systemId);
+
 
         if(!system){
             res.status(400).send({msg: "the system does not exist"});
+        }else if(system.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            system = await System.findByIdAndUpdate(systemId, params);
             res.status(201).send({msg: "the system has been update"});
         }
     }catch(error){
@@ -89,13 +103,17 @@ async function deleteSystem(req, res){
     // delete a system
 
     const systemId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const system = await System.findByIdAndDelete(systemId);
+        let system = await System.findById(systemId);
 
         if(!system){
             res.status(400).send({msg: "the system does not exist"});
+        }else if(system.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            system = await System.findByIdAndDelete(systemId);
             res.status(200).send({msg: "the system has been delete"});
         }
     }catch(error){

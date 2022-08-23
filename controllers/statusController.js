@@ -1,11 +1,14 @@
 
 const Status = require('../models/statusModel');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 async function getStatusList(req, res){
     // returns a list of product status
+
+    const user = await authMiddleware.getUser(req, res);
     
     try{
-        const status = await Status.find().sort({status: 1});
+        const status = await Status.find({user_id: user.id}).sort({status: 1});
 
         if(status.length === 0){
             res.status(400).send({msg: "there are no status"});
@@ -21,12 +24,15 @@ async function getStatus(req, res){
     // returns a status
 
     const statusId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
         const status = await Status.findById(statusId);
 
         if(!status){
             res.status(400).send({msg: "the status does not exist"});
+        }else if(status.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
             res.status(200).send(status);
         }
@@ -39,12 +45,14 @@ async function getStatus(req, res){
 async function postStatus(req, res){
     // create a new status
 
+    const user = await authMiddleware.getUser(req, res);
+
     const status = new Status();
     const params = req.body;
 
     // body data:
     status.status = params.status;
-    status.key = params.key;
+    status.user_id = user.id; 
 
     try{
         const statusStore = await status.save();
@@ -64,13 +72,17 @@ async function putStatus(req, res){
 
     const statusId = req.params.id;
     const params = req.body;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const status = await Status.findByIdAndUpdate(statusId, params);
+        let status = await Status.findById(statusId);
 
         if(!status){
             res.status(400).send({msg: "the status does not exist"});
+        }else if(status.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            status = await Status.findByIdAndUpdate(statusId, params);
             res.status(201).send({msg: "the status has been update"});
         }
     }catch(error){
@@ -82,13 +94,17 @@ async function deleteStatus(req, res){
     // delete a status
 
     const statusId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const status = await Status.findByIdAndDelete(statusId);
+        let status = await Status.findById(statusId);
 
         if(!status){
             res.status(400).send({msg: "the status does not exist"});
+        }else if(status.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            status = await Status.findByIdAndDelete(statusId);
             res.status(200).send({msg: "the status has been delete"});
         }
     }catch(error){

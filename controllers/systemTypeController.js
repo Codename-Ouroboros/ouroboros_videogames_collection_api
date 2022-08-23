@@ -1,11 +1,14 @@
 
 const SystemType = require('../models/systemTypeModel');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 async function getSystemTypes(req, res){
     // returns a list of System types
+
+    const user = await authMiddleware.getUser(req, res);
     
     try{
-        const systemType = await SystemType.find().sort({type: 1});
+        const systemType = await SystemType.find({user_id: user.id}).sort({type: 1});
 
         if(systemType.length === 0){
             res.status(400).send({msg: "there are no System Type"});
@@ -21,12 +24,15 @@ async function getSystemType(req, res){
     // returns a system type
 
     const systemTypeId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
         const systemType = await SystemType.findById(systemTypeId);
 
         if(!systemType){
             res.status(400).send({msg: "the system type does not exist"});
+        }else if(systemType.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
             res.status(200).send(systemType);
         }
@@ -39,6 +45,8 @@ async function getSystemType(req, res){
 async function postSystemType(req, res){
     // create a new system type
 
+    const user = await authMiddleware.getUser(req, res);
+
     const systemType = new SystemType();
     const params = req.body;
 
@@ -46,6 +54,7 @@ async function postSystemType(req, res){
     systemType.type = params.type;
     systemType.key = params.key;
     systemType.logo = params.logo;
+    systemType.user_id = user.id;
 
     try{
         const systemTypeStore = await systemType.save();
@@ -65,15 +74,20 @@ async function putSystemType(req, res){
 
     const systemTypeId = req.params.id;
     const params = req.body;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const systemType = await SystemType.findByIdAndUpdate(systemTypeId, params);
+        let systemType = await SystemType.findById(systemTypeId);
 
         if(!systemType){
             res.status(400).send({msg: "the system type does not exist"});
+        }else if(systemType.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            systemType = await SystemType.findByIdAndUpdate(systemTypeId, params);
             res.status(201).send({msg: "the system type has been update"});
         }
+
     }catch(error){
         res.status(500).send(error);
     }
@@ -83,13 +97,17 @@ async function deleteSystemType(req, res){
     // delete a systemType
 
     const systemTypeId = req.params.id;
+    const user = await authMiddleware.getUser(req, res);
 
     try{
-        const systemType = await SystemType.findByIdAndDelete(systemTypeId);
+        let systemType = await SystemType.findById(systemTypeId);
 
         if(!systemType){
             res.status(400).send({msg: "the system type does not exist"});
+        }else if(systemType.user_id != user.id){
+            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
         }else{
+            systemType = await SystemType.findByIdAndDelete(systemTypeId);
             res.status(200).send({msg: "the system type has been delete"});
         }
     }catch(error){

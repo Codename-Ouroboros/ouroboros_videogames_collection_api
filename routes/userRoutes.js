@@ -11,5 +11,6 @@ api.post('/register', userController.register);
 api.post('/login', userController.login);
 api.put('/users/:id', [authMiddleware.ensureAuth, multipartyMiddleware], userController.updateUser);
 api.get('/users/avatar/:avatarName', [authMiddleware.ensureAuth], userController.getAvatar);
+api.delete('/users', [authMiddleware.ensureAuth], userController.deleteUser);
 
 module.exports = api;

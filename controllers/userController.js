@@ -1,9 +1,9 @@
 const bcryptjs = require('bcryptjs');
-const User = require('../models/userModel');
-const jwt = require('../services/jwtService');
 const path = require('path');
 const fs = require('fs');
-const { nextTick } = require('process');
+const User = require('../models/userModel');
+const jwt = require('../services/jwtService');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 async function register(req, res){
     // Register users 
@@ -110,6 +110,37 @@ function updateUser(req, res){
     });
 }
 
+async function deleteUser(req, res){
+    // delete a user
+
+    const current_user = await authMiddleware.getUser(req, res);
+
+    try{
+        User.findById({_id: current_user.id}, (err, userData) =>{
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let user = userData;
+
+                if(!user){
+                    res.status(400).send({msg: "the user type does not exist"});
+                }else{
+                    User.findByIdAndDelete({_id: current_user.id}, (err, userResult) => {
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{      
+                            res.status(200).send({msg: "the user has been delete"});
+                        }
+                    });
+                }
+            }
+        });
+
+    }catch(error){
+        res.status(500).send(error);
+    }
+}
+
 function getAvatar(req, res){
     // show the avatar's image:
 
@@ -129,5 +160,6 @@ module.exports = {
     register,
     login,
     updateUser,
-    getAvatar
+    getAvatar,
+    deleteUser
 }

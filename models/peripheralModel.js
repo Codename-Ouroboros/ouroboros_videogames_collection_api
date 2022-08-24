@@ -15,6 +15,10 @@ const peripheralSchema = Schema({
         type: ObjectId,
         require: false
     },
+    photo: {
+        type: String,
+        require: false
+    },
     images: {
         type: Array,
         require: false

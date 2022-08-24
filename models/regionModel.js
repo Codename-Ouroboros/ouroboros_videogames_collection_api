@@ -7,10 +7,6 @@ const regionSchema = Schema({
         type: String,
         require: true
     },
-    logo: {
-        type: String,
-        require: false,
-    },
     user_id: {
         type: ObjectId,
         require: true

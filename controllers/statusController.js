@@ -75,16 +75,31 @@ async function putStatus(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let status = await Status.findById(statusId);
+        Status.findById({_id: statusId}, (err, statusData) =>{
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let status = statusData;
 
-        if(!status){
-            res.status(400).send({msg: "the status does not exist"});
-        }else if(status.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            status = await Status.findByIdAndUpdate(statusId, params);
-            res.status(201).send({msg: "the status has been update"});
-        }
+                if(!status){
+                    res.status(400).send({msg: "the status does not exist"});
+                }else if(status.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    status.status = params.status;
+    
+                    Status.findByIdAndUpdate({_id: statusId}, status, (err, statusResult) => {
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{
+                            res.status(201).send({msg: "the status has been update"});
+                        } 
+                    });
+                }
+            }
+        });
+
+        
     }catch(error){
         res.status(500).send(error);
     }

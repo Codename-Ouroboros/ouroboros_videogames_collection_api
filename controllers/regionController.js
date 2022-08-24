@@ -52,7 +52,6 @@ async function postRegion(req, res){
 
     // body data:
     region.region = params.region;
-    region.logo = params.logo;
     region.user_id = user.id;
 
     try{
@@ -76,16 +75,29 @@ async function putRegion(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let region = await Region.findById(regionId);
+        Region.findById({_id: regionId}, (err, regionData) => {
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let region = regionData;
 
-        if(!region){
-            res.status(400).send({msg: "the region does not exist"});
-        }else if(region.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            region = await Region.findByIdAndUpdate(regionId, params);
-            res.status(201).send({msg: "the region has been update"});
-        }
+                if(!region){
+                    res.status(400).send({msg: "the region does not exist"});
+                }else if(region.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    region.name = params.name;
+
+                    Region.findByIdAndUpdate({_id: regionId}, region, (err, regionResult)=>{
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{     
+                            res.status(201).send({msg: "the region has been update"});
+                        }
+                    });
+                }
+            }
+        });
     }catch(error){
         res.status(500).send(error);
     }

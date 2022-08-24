@@ -15,14 +15,14 @@ const systemSchema = Schema({
         type: String,
         require: false
     },
+    photo: {
+        type: String,
+        require: false
+    },
     images: {
         type: Array,
         require: false
     }, 
-    text_logo: {
-        type: String,
-        require: false
-    },
     type_system: {
         type: ObjectId,
         require: true

@@ -76,16 +76,30 @@ async function putGenre(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let genre = await Genre.findById(genreId);
+        Genre.findById({_id: genreId}, (err, genreData)=>{
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let genre = genreData;
 
-        if(!genre){
-            res.status(400).send({msg: "the genre does not exist"});
-        }else if(genre.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            genre = await Genre.findByIdAndUpdate(genreId, params);
-            res.status(201).send({msg: "the genre has been update"});
-        }
+                if(!genre){
+                    res.status(404).send({msg: "the genre does not exist"});
+                }else if(genre.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    genre.name = params.name;
+                    
+                    Genre.findByIdAndUpdate({_id: genreId}, genre, (err, genreResult)=>{
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{
+                            res.status(201).send({msg: "the genre has been update"});
+                        }
+                    });
+                }
+            }
+        });
+
     }catch(error){
         res.status(500).send(error);
     }

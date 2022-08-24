@@ -128,3 +128,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# ignore archives jpg, jpeg and png:
+*.jpg 
+*.jpeg 
+*.png 

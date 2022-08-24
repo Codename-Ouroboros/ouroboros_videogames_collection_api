@@ -23,10 +23,6 @@ const systemSchema = Schema({
         type: Array,
         require: false
     }, 
-    text_logo: {
-        type: String,
-        require: false
-    },
     type_system: {
         type: ObjectId,
         require: true

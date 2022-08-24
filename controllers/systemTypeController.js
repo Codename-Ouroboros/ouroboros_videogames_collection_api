@@ -75,16 +75,29 @@ async function putSystemType(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let systemType = await SystemType.findById(systemTypeId);
+        SystemType.findById({_id: systemTypeId}, (err, systemTypeData) =>{
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let systemType = systemTypeData;
 
-        if(!systemType){
-            res.status(400).send({msg: "the system type does not exist"});
-        }else if(systemType.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            systemType = await SystemType.findByIdAndUpdate(systemTypeId, params);
-            res.status(201).send({msg: "the system type has been update"});
-        }
+                if(!systemType){
+                    res.status(400).send({msg: "the system type does not exist"});
+                }else if(systemType.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    systemType.type = params.type;
+
+                    SystemType.findByIdAndUpdate({_id: systemTypeId}, systemType, (err, systemTypeResult)=>{
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{
+                            res.status(201).send({msg: "the system type has been update"});
+                        }
+                    });
+                }
+            }
+        });
 
     }catch(error){
         res.status(500).send(error);

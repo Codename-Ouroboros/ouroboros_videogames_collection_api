@@ -1,6 +1,9 @@
 const bcryptjs = require('bcryptjs');
 const User = require('../models/userModel');
 const jwt = require('../services/jwtService');
+const path = require('path');
+const fs = require('fs');
+const { nextTick } = require('process');
 
 async function register(req, res){
     // Register users 
@@ -55,7 +58,76 @@ async function login(req, res){
     }
 }
 
+function updateUser(req, res){
+    // upload a user's avatar
+
+    const params = req.params;
+    
+    User.findById({_id: params.id}, async (err, userData) => {
+        if(err){
+            res.status(500).send({msg: "Server status error"});
+        }else{
+            if(!userData){
+                res.status(404).send({msg: "User doesn't exists"});
+            }else{
+                const salt = bcryptjs.genSaltSync(10);
+                let user = userData;
+                let body = req.body;
+
+                user.nickname = body.nickname;
+                user.name = body.name;
+                user.lastname = body.lastname;
+                user.email = body.email;
+                user.birthdate = body.birthdate;
+                if(body.password){
+                    user.password = await bcryptjs.hash(body.password, salt);
+                }
+
+                if(req.files.avatar){
+                    const filePath = req.files.avatar.path;
+                    let fileSplit = path.resolve(filePath).split(path.sep);
+
+                    let filename = fileSplit[fileSplit.length-1];
+
+                    let fileExt = filename.split(".");
+                    if(fileExt[fileExt.length-1] !== "jpg" && fileExt[fileExt.length-1] !== "jpeg" && fileExt[fileExt.length-1] !== "png"){
+                        // res.status(400).send({msg: "Incorrect extension. Only use .jpg, .jpeg or .png"});
+                        console.log('incorrect extension');
+                    }else{
+                        user.avatar = filename;
+                    }
+                }
+
+                User.findByIdAndUpdate({_id: params.id}, user, (err, userResult) => {
+                    if(err){
+                        res.status(404).send({msg: err});
+                    }else{
+                        res.status(200).send({msg: "User change succesfully"});
+                    }
+                });
+            }
+        }
+    });
+}
+
+function getAvatar(req, res){
+    // show the avatar's image:
+
+    const avatarName = req.params.avatarName;
+    const filePath = `./uploads/images/avatars/${avatarName}`;
+
+    fs.stat(filePath, (err, stat)=>{
+        if(err){
+            res.status(404).send({msg: "Avatar doesn't exists"});
+        }else{
+            res.sendFile(path.resolve(filePath));
+        }
+    });
+}
+
 module.exports = {
     register,
-    login
+    login,
+    updateUser,
+    getAvatar
 }

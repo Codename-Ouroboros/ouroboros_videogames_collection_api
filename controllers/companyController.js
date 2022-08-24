@@ -1,4 +1,5 @@
-
+const path = require('path');
+const fs = require('fs');
 const Company = require('../models/companyModel');
 const authMiddleware = require('../middlewares/authMiddleware');
 
@@ -48,12 +49,26 @@ async function postCompany(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     const company = new Company();
-    const params = req.body;
+    const body = req.body;
 
     // body data:
-    company.name = params.name;
-    company.logo = params.logo;
+    company.name = body.name;
     company.user_id = user.id;
+
+    if(req.files.logo){
+        const filePath = req.files.logo.path;
+        let fileSplit = path.resolve(filePath).split(path.sep);
+
+        let filename = fileSplit[fileSplit.length-1];
+
+        let fileExt = filename.split(".");
+        if(fileExt[fileExt.length-1] !== "jpg" && fileExt[fileExt.length-1] !== "jpeg" && fileExt[fileExt.length-1] !== "png"){
+            // res.status(400).send({msg: "Incorrect extension. Only use .jpg, .jpeg or .png"});
+            console.log('incorrect extension');
+        }else{
+            company.logo = filename;
+        }
+    }
 
     try{
         const companyStore = await company.save();
@@ -76,16 +91,46 @@ async function putCompany(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let company = await Company.findById(companyId);
+        Company.findById({ _id: companyId}, (err, companyData) => {
+            let company = companyData;
 
-        if(!company){
-            res.status(400).send({msg: "the company does not exist"});
-        }else if(company.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            company = await Company.findByIdAndUpdate(companyId, params);
-            res.status(201).send({msg: "the company has been update"});
-        }
+            if(err){
+                res.status(500).send({msg: "Server status error"});
+            }else{
+                if(!companyData){
+                    res.status(404).send({msg: "the company does not exist"});
+                }else if(company.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    let company = companyData;
+
+                    company.name = params.name;
+
+                    if(req.files.logo){
+                        const filePath = req.files.logo.path;
+                        let fileSplit = path.resolve(filePath).split(path.sep);
+                
+                        let filename = fileSplit[fileSplit.length-1];
+                
+                        let fileExt = filename.split(".");
+                        if(fileExt[fileExt.length-1] !== "jpg" && fileExt[fileExt.length-1] !== "jpeg" && fileExt[fileExt.length-1] !== "png"){
+                            // res.status(400).send({msg: "Incorrect extension. Only use .jpg, .jpeg or .png"});
+                            console.log('incorrect extension');
+                        }else{
+                            company.logo = filename;
+                        }
+                    }
+
+                    Company.findByIdAndUpdate({_id: companyId}, company, (err, companyResult) => {
+                        if(err){
+                            res.status(404).send({msg: err});
+                        }else{
+                            res.status(201).send({msg: "the company has been update"});
+                        }
+                    });
+                }
+            }
+        });
         
     }catch(error){
         res.status(500).send(error);
@@ -116,10 +161,26 @@ async function deleteCompany(req, res){
     }
 }
 
+function getLogo(req, res){
+    // show the avatar's image:
+
+    const logoName = req.params.logoName;
+    const filePath = `./uploads/images/companies/logo/${logoName}`;
+
+    fs.stat(filePath, (err, stat)=>{
+        if(err){
+            res.status(404).send({msg: "Logo doesn't exists"});
+        }else{
+            res.sendFile(path.resolve(filePath));
+        }
+    });
+}
+
 module.exports = {
     getCompanies,
     getCompany,
     postCompany,
     putCompany,
-    deleteCompany
+    deleteCompany,
+    getLogo
 }

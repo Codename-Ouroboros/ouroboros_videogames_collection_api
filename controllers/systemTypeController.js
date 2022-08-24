@@ -111,16 +111,28 @@ async function deleteSystemType(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let systemType = await SystemType.findById(systemTypeId);
+        SystemType.findById({_id: systemTypeId}, (err, systemTypeData) =>{
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let systemType = systemTypeData;
 
-        if(!systemType){
-            res.status(400).send({msg: "the system type does not exist"});
-        }else if(systemType.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            systemType = await SystemType.findByIdAndDelete(systemTypeId);
-            res.status(200).send({msg: "the system type has been delete"});
-        }
+                if(!systemType){
+                    res.status(400).send({msg: "the system type does not exist"});
+                }else if(systemType.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    SystemType.findByIdAndDelete({_id: systemTypeId}, (err, systemTypeResult) => {
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{      
+                            res.status(200).send({msg: "the system type has been delete"});
+                        }
+                    });
+                }
+            }
+        });
+
     }catch(error){
         res.status(500).send(error);
     }

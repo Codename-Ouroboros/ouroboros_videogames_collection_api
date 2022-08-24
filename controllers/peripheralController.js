@@ -195,16 +195,28 @@ async function deletePeripheral(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let peripheral = await Peripheral.findById(peripheralId);
+        Peripheral.findById({_id: peripheralId}, (err, peripheralData) =>{
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let peripheral = peripheralData;
 
-        if(!peripheral){
-            res.status(400).send({msg: "the peripheral does not exist"});
-        }else if(peripheral.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            peripheral = await Peripheral.findByIdAndDelete(peripheralId);
-            res.status(200).send({msg: "the peripheral has been delete"});
-        }
+                if(!peripheral){
+                    res.status(400).send({msg: "the peripheral does not exist"});
+                }else if(peripheral.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    Peripheral.findByIdAndDelete({_id: peripheralId}, (err, peripheralResult) => {
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{
+                            res.status(200).send({msg: "the peripheral has been delete"});
+                        }
+                    });
+                }
+            }
+        });
+        
     }catch(error){
         res.status(500).send(error);
     }

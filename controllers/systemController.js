@@ -221,16 +221,28 @@ async function deleteSystem(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let system = await System.findById(systemId);
+        System.findById({_id: systemId}, (err, systemData) =>{
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let system = systemData;
 
-        if(!system){
-            res.status(400).send({msg: "the system does not exist"});
-        }else if(system.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            system = await System.findByIdAndDelete(systemId);
-            res.status(200).send({msg: "the system has been delete"});
-        }
+                if(!system){
+                    res.status(400).send({msg: "the system does not exist"});
+                }else if(system.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    System.findByIdAndDelete({_id: systemId}, (err, systemResult) =>{
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{
+                            res.status(200).send({msg: "the system has been delete"});
+                        }
+                    });
+                }
+            }
+        });
+
     }catch(error){
         res.status(500).send(error);
     }

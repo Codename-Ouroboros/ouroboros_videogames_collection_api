@@ -86,7 +86,7 @@ async function putRegion(req, res){
                 }else if(region.user_id != user.id){
                     res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
                 }else{
-                    region.name = params.name;
+                    region.region = params.region;
 
                     Region.findByIdAndUpdate({_id: regionId}, region, (err, regionResult)=>{
                         if(err){
@@ -110,16 +110,28 @@ async function deleteRegion(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let region = await Region.findById(regionId);
+        Region.findById({_id: regionId}, (err, regionData) => {
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let region = regionData;
 
-        if(!region){
-            res.status(400).send({msg: "the region does not exist"});
-        }else if(region.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            region = await Region.findByIdAndDelete(regionId);
-            res.status(200).send({msg: "the region has been delete"});
-        }
+                if(!region){
+                    res.status(400).send({msg: "the region does not exist"});
+                }else if(region.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    Region.findByIdAndDelete({_id: regionId}, (err, regionResult) =>{
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{
+                            res.status(200).send({msg: "the region has been delete"});
+                        }
+                    });
+                }
+            }
+        });
+
     }catch(error){
         res.status(500).send(error);
     }

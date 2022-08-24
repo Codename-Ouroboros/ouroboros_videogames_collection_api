@@ -112,16 +112,28 @@ async function deleteStatus(req, res){
     const user = await authMiddleware.getUser(req, res);
 
     try{
-        let status = await Status.findById(statusId);
+        Status.findById({_id: statusId}, (err, statusData) => {
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let status = statusData;
 
-        if(!status){
-            res.status(400).send({msg: "the status does not exist"});
-        }else if(status.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            status = await Status.findByIdAndDelete(statusId);
-            res.status(200).send({msg: "the status has been delete"});
-        }
+                if(!status){
+                    res.status(400).send({msg: "the status does not exist"});
+                }else if(status.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    Status.findByIdAndDelete({_id:statusId}, (err, statusResult) => {
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{
+                            res.status(200).send({msg: "the status has been delete"});
+                        }
+                    });
+                }
+            }
+        });
+
     }catch(error){
         res.status(500).send(error);
     }

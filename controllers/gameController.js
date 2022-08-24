@@ -206,16 +206,29 @@ async function deleteGame(req, res){
     try{
 
         
-        let game = await Game.findById(gameId);
+        Game.findById({_id: gameId}, (err, gameData) =>{
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let game = gameData;
+
+                if(!game){
+                    res.status(400).send({msg: "the game does not exist"});
+                }else if(game.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    Game.findByIdAndDelete({_id: gameId}, (err, gameResult) =>{
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{
+                            res.status(200).send({msg: "the game has been delete"});
+                        }
+                    });
+                }
+            }
+        });
         
-        if(!game){
-            res.status(400).send({msg: "the game does not exist"});
-        }else if(game.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            game = await Game.findByIdAndDelete(gameId);
-            res.status(200).send({msg: "the game has been delete"});
-        }
+        
     }catch(error){
         res.status(500).send(error);
     }

@@ -145,17 +145,28 @@ async function deleteCompany(req, res){
 
     try{
         
-        let company = await Company.findById(companyId);
+        Company.findById({_id: companyId}, (err, companyData)=>{
+            if(err){
+                res.status(500).send({msg: err});
+            }else{
+                let company = companyData; 
 
-        if(!company){
-            res.status(400).send({msg: "the company does not exist"});
-        }else if(company.user_id != user.id){
-            res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
-        }else{
-            company = await Company.findByIdAndDelete(companyId);
-            res.status(200).send({msg: "the company has been delete"});
-        }
-
+                if(!company){
+                    res.status(400).send({msg: "the company does not exist"});
+                }else if(company.user_id != user.id){
+                    res.status(403).send({msg: "Forbidden - Access to this resource on the server is denied!"});
+                }else{
+                    Company.findByIdAndDelete({_id: companyId}, (err, companyResult) => {
+                        if(err){
+                            res.status(500).send({msg: err});
+                        }else{
+                            res.status(200).send({msg: "the company has been delete"});
+                        }
+                    });
+                }
+            }
+        });
+        
     }catch(error){
         res.status(500).send(error);
     }

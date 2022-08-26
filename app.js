@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+const cors = require('cors');
+
 // Import routes:
 const companyRoutes = require('./routes/companyRoutes');
 const genreRoutes = require('./routes/genreRoutes');
@@ -13,6 +15,7 @@ const userRoutes = require('./routes/userRoutes');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cors());
 
 // Route list:
 app.use('/api', companyRoutes);
